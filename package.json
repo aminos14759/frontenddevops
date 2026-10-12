@@ -5,7 +5,12 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "test": "ng test",
+    "test": {
+      "builder": "@angular-devkit/build-angular:karma",
+      "options": {
+        "karmaConfig": "karma.conf.js"
+      }
+    },
     "sonar": "sonar-scanner-npm"
   },
   "private": true,
@@ -26,8 +31,15 @@
     "@angular/build": "^22.1.7",
     "@angular/cli": "^22.1.7",
     "@angular/compiler-cli": "^22.1.0",
+    "@types/jasmine": "^7.0.0",
     "@vitest/coverage-v8": "^4.1.11",
+    "jasmine-core": "^7.0.2",
     "jsdom": "^28.0.0",
+    "karma": "^6.4.4",
+    "karma-chrome-launcher": "^3.2.0",
+    "karma-coverage": "^2.2.1",
+    "karma-jasmine": "^5.1.0",
+    "karma-jasmine-html-reporter": "^2.3.0",
     "prettier": "^3.8.1",
     "sonar-scanner": "^3.1.0",
     "sonarqube-scanner": "^5.0.0",
