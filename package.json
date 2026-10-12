@@ -11,7 +11,7 @@
         "karmaConfig": "karma.conf.js"
       }
     },
-    "sonar": "sonar-scanner-npm"
+    "sonar": "sonar-scanner"
   },
   "private": true,
   "packageManager": "npm@11.12.1",
