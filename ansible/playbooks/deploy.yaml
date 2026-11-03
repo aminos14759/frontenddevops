@@ -1,0 +1,89 @@
+
+---
+- name: Deploy Angular Frontend on Minikube
+  hosts: minikube
+  become: false
+
+  tasks:
+
+    # 1. Connectivity
+    - name: Check SSH connection
+      ping:
+
+    - name: Validate frontend image
+      assert:
+        that:
+          - frontend_image is defined
+          - frontend_image | length > 0
+        fail_msg: "Frontend image variable is missing"
+        success_msg: "Frontend image is valid"
+
+    # 2. Check Minikube
+    - name: Check Minikube status
+      command: minikube status
+      register: minikube_status
+      changed_when: false
+
+    - name: Display Minikube status
+      debug:
+        var: minikube_status.stdout_lines
+
+    # 3. Prepare deployment directory
+    - name: Create project directory
+      file:
+        path: /home/vagrant/frontend-devops/k8s
+        state: directory
+        mode: '0755'
+
+    # 4. Copy Kubernetes manifests
+    - name: Copy Kubernetes manifests
+      copy:
+        src: "{{ playbook_dir }}/../k8s/"
+        dest: /home/vagrant/frontend-devops/k8s/
+        mode: preserve
+
+    # 5. Create namespace
+    - name: Create Kubernetes namespace
+      command: >
+        kubectl apply
+        -f /home/vagrant/frontend-devops/k8s/namespace.yaml
+
+    # 6. Deploy frontend
+    - name: Apply frontend manifest
+      command: >
+        kubectl apply
+        -f /home/vagrant/frontend-devops/k8s/frontend.yaml
+
+    # 7. Configure Docker image
+    - name: Configure frontend image
+      command: >
+        kubectl set image deployment/frontend-deployment
+        frontend={{ frontend_image }}
+        -n devops
+
+    # 8. Wait for deployment
+    - name: Wait for frontend deployment
+      command: >
+        kubectl rollout status deployment/frontend-deployment
+        -n devops --timeout=180s
+      changed_when: false
+
+    # 9. Verify deployment
+    - name: Get Kubernetes resources
+      command: kubectl get pods,services -n devops
+      register: resources
+      changed_when: false
+
+    - name: Display deployment result
+      debug:
+        var: resources.stdout_lines
+
+    # 10. Display frontend endpoint
+    - name: Get Minikube IP
+      command: minikube ip
+      register: minikube_ip
+      changed_when: false
+
+    - name: Display frontend URL
+      debug:
+        msg: "Frontend URL: http://{{ minikube_ip.stdout }}:30170"
