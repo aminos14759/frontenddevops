@@ -6,7 +6,7 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root'
 })
 export class SecteurActiviteService {
-  readonly API_URL = 'http://localhost:8089/SpringMVC/secteurActivite';
+  readonly API_URL = '/SpringMVC/secteurActivite';
 
   constructor(private httpClient: HttpClient) { }
 
@@ -23,3 +23,4 @@ export class SecteurActiviteService {
     return  this.httpClient.delete(`${this.API_URL}/remove-secteurActivite/${idSecteurActivite}`)
   }
 }
+
