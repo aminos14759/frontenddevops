@@ -8,17 +8,17 @@ OUT.mkdir(exist_ok=True)
 K = {"crit": 0, "high": 0}
 
 STAGES = [
-    ("Maven Build", "🔨", "Compile et package le projet."),
-    ("Tests Unitaires + Coverage", "🧪", "Tests unitaires et couverture JaCoCo."),
-    ("Trivy FS Scan", "🛡️", "Vulnérabilités dans le code et les dépendances."),
-    ("Deploy to Nexus", "📦", "Publie l'artefact Maven sur Nexus."),
+    ("Checkout GitHub", "📥", "Récupère le code depuis GitHub."),
+    ("Install Dependencies", "📦", "Installe les dépendances avec npm ci."),
+    ("Lint", "🧹", "Analyse la qualité du code (ESLint)."),
+    ("Build", "🔨", "Build Angular en mode production."),
+    ("Trivy FS Scan", "🛡️", "Vulnérabilités dans les dépendances npm."),
     ("SonarQube Analysis", "🔍", "Bugs, vulnérabilités et code smells."),
-    ("Docker Build", "🐳", "Construit l'image Docker."),
+    ("Docker Build", "🐳", "Construit l'image Docker du frontend."),
     ("Trivy Image Scan", "🛡️", "Vulnérabilités dans l'image Docker."),
+    ("Docker Login", "🔑", "Connexion à Docker Hub."),
     ("Docker Push", "🚀", "Publie l'image sur Docker Hub."),
-    ("Docker Compose", "🧩", "Lance les conteneurs."),
-    ("Deploy to Kubernetes", "☸️", "Déploie sur Minikube."),
-    ("Monitoring with Grafana Prometheus", "📈", "Prometheus, Grafana et cAdvisor."),
+    ("Deploy Frontend on Minikube", "☸️", "Déploiement via Ansible sur Minikube."),
 ]
 
 ST = {
@@ -77,18 +77,20 @@ def trivy(path):
     return run
 
 def sonar():
-    return ("<p><a class='btn' target='_blank' "
-            "href='http://127.0.0.1:9000/dashboard?id=devopsbackend'>Ouvrir SonarQube</a></p>")
+    key = os.getenv("SONAR_PROJECT_KEY", "frontend")
+    return (f"<p><a class='btn' target='_blank' "
+            f"href='http://127.0.0.1:9000/dashboard?id={E(key)}'>Ouvrir SonarQube</a></p>")
 
-def jacoco():
-    base = os.getenv("BUILD_URL", "#")
-    return f"<p><a class='btn' target='_blank' href='{E(base)}JaCoCo_Coverage/'>Ouvrir JaCoCo</a></p>"
+def build_info():
+    image = f"{os.getenv('IMAGE_NAME', '')}:{os.getenv('IMAGE_TAG', '')}"
+    return f"<p>Image : <code>{E(image)}</code></p>"
 
 DET = {
     "Trivy FS Scan": trivy("trivy-report.json"),
     "Trivy Image Scan": trivy("trivy-image-report.json"),
     "SonarQube Analysis": sonar,
-    "Tests Unitaires + Coverage": jacoco,
+    "Docker Build": build_info,
+    "Docker Push": build_info,
 }
 
 CSS = """
